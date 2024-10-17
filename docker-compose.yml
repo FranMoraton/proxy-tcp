@@ -1,0 +1,22 @@
+services:
+  tcp_server:
+    build:
+      context: ./tcp_server
+    ports:
+      - "9000:9000"
+
+  myapp:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - tcp_server
+
+  dummy_api:
+    build:
+      context: ./dummy_api
+    ports:
+      - "8081:8081"
