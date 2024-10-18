@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -46,6 +47,9 @@ func main() {
 	// Iniciar los workers con el contexto
 	workers.StartWorkers(ctx, workerCount, msgChan, apiURL, tcpAddress, &wg)
 
+	// Crear el servidor HTTP
+	srv := &http.Server{Addr: ":8080"}
+
 	http.HandleFunc("/send", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleSend(w, r, msgChan)
 	})
@@ -70,8 +74,18 @@ func main() {
 	}()
 
 	fmt.Println("Servidor HTTP escuchando en :8080")
-	err = http.ListenAndServe(":8080", nil)
-	if err != nil {
+	// Usar Shutdown para cerrar el servidor ordenadamente
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Println("Error al iniciar el servidor:", err)
 	}
+
+	// Realizar el cierre del servidor después de la cancelación
+	ctx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelShutdown()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		fmt.Println("Error al cerrar el servidor:", err)
+	}
+
+	fmt.Println("Servidor cerrado.")
 }
