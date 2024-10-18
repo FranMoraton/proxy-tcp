@@ -37,7 +37,9 @@ cache-folders:
 		mkdir -p ~/.go-cache && chown ${UID}:${GID} ~/.go-cache
 
 curl:
-		curl -X POST http://localhost:8080/send
+		curl -X POST http://localhost:8080/send \
+		-H "Content-Type: application/json" \
+		-d '{"message": "someText"}'
 
 curl-api:
 		curl -X POST http://localhost:8081/dummy-api

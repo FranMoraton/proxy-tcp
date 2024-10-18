@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"time"
@@ -11,12 +12,14 @@ import (
 
 // Llamar a otra API HTTP con la respuesta recibida
 func CallAnotherAPI(apiURL, response string) {
+	// Serializar el cuerpo de la petición
 	body, err := json.Marshal(map[string]string{"response": response})
 	if err != nil {
 		fmt.Println("Error al serializar el cuerpo:", err)
 		return
 	}
 
+	// Hacer la petición POST a la otra API
 	resp, err := http.Post(apiURL, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("Error al llamar a la otra API:", err)
@@ -24,10 +27,18 @@ func CallAnotherAPI(apiURL, response string) {
 	}
 	defer resp.Body.Close()
 
+	// Leer el cuerpo de la respuesta para manejarlo o mostrarlo
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error al leer el cuerpo de la respuesta:", err)
+		return
+	}
+
+	// Comprobar el código de estado de la respuesta
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("La otra API devolvió un estado %s\n", resp.Status)
+		fmt.Printf("La otra API devolvió un estado %s. Respuesta: %s\n", resp.Status, string(respBody))
 	} else {
-		fmt.Println("Llamada a la otra API completada con éxito.")
+		fmt.Printf("Llamada a la otra API completada con éxito. Respuesta: %s\n", string(respBody))
 	}
 }
 
