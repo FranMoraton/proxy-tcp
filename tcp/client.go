@@ -2,11 +2,11 @@ package tcp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -32,18 +32,27 @@ func CallAnotherAPI(apiURL, response string) {
 	}
 }
 
-// Establecer conexión TCP y enviar un mensaje
-func SendTCPMessage(content string, tcpAddress string) (string, error) {
+// Establecer conexión TCP y enviar un mensaje, con soporte para cancelación de contexto
+func SendTCPMessage(ctx context.Context, content string, tcpAddress string) (string, error) {
 	var conn net.Conn
 	var err error
 
-	// Intentar conectarse al servidor TCP usando la variable de entorno
+	// Intentar conectarse al servidor TCP usando el contexto
+	dialer := net.Dialer{
+		Timeout: 5 * time.Second, // Timeout para la conexión
+	}
+
 	for {
-		conn, err = net.Dial("tcp", tcpAddress)
+		conn, err = dialer.DialContext(ctx, "tcp", tcpAddress)
 		if err != nil {
 			fmt.Println("Error al conectar al servidor TCP, reintentando en 2 segundos...")
-			time.Sleep(2 * time.Second) // Esperar antes de reintentar
-			continue
+
+			select {
+			case <-ctx.Done(): // Revisar si el contexto fue cancelado
+				return "Conexión cancelada por contexto", ctx.Err()
+			case <-time.After(2 * time.Second): // Reintentar después de 2 segundos
+				continue
+			}
 		}
 		break // Conexión establecida, salir del bucle
 	}
@@ -55,7 +64,8 @@ func SendTCPMessage(content string, tcpAddress string) (string, error) {
 		return "Error al enviar el mensaje TCP", err
 	}
 
-	// Leer la respuesta del servidor TCP
+	// Leer la respuesta del servidor TCP con timeout
+	conn.SetReadDeadline(time.Now().Add(5 * time.Second)) // Timeout de lectura
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 	if err != nil {

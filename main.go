@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"myapp/api"
+	"myapp/workers"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
-	"myapp/api"
-	"myapp/workers"
 )
 
 func main() {
@@ -25,18 +26,20 @@ func main() {
 		apiURL = "http://localhost:8000/another-api" // Valor por defecto
 	}
 
-
 	// Leer la dirección TCP desde las variables de entorno
 	tcpAddress := os.Getenv("TCP_ADDRESS")
 	if tcpAddress == "" {
-		tcpAddress = "http://localhost:9000"
+		tcpAddress = "localhost:9000"
 	}
 
 	// Crear un canal para comunicarse entre goroutines
 	msgChan := make(chan workers.Message)
 
-	// Iniciar los workers
-	workers.StartWorkers(workerCount, msgChan, apiURL, tcpAddress)
+	// Crear un contexto con cancelación para poder cerrar los workers
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Iniciar los workers con el contexto
+	workers.StartWorkers(ctx, workerCount, msgChan, apiURL, tcpAddress)
 
 	http.HandleFunc("/send", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleSend(w, r, msgChan)
@@ -50,7 +53,8 @@ func main() {
 		<-sigs // Esperar la señal de terminación
 		fmt.Println("Señal de terminación recibida. Cerrando el servidor...")
 
-		close(msgChan) // Cerrar el canal para que los workers terminen
+		cancel()        // Cancelar el contexto para que los workers terminen
+		close(msgChan)  // Cerrar el canal para detener los workers
 	}()
 
 	fmt.Println("Servidor HTTP escuchando en :8080")
