@@ -9,12 +9,14 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"sync"
 	"syscall"
 )
 
 func main() {
 	// Crear contexto con cancelación
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// Leer el número de workers desde la variable de entorno
 	workerCountStr := os.Getenv("WORKERS")
@@ -38,8 +40,11 @@ func main() {
 	// Crear un canal para comunicarse entre goroutines
 	msgChan := make(chan workers.Message)
 
+	// Crear un wait group para esperar a que los workers terminen
+	var wg sync.WaitGroup
+
 	// Iniciar los workers con el contexto
-	workers.StartWorkers(ctx, workerCount, msgChan, apiURL, tcpAddress)
+	workers.StartWorkers(ctx, workerCount, msgChan, apiURL, tcpAddress, &wg)
 
 	http.HandleFunc("/send", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleSend(w, r, msgChan)
@@ -52,8 +57,16 @@ func main() {
 	go func() {
 		<-sigs // Esperar la señal de terminación
 		fmt.Println("Señal de terminación recibida. Cerrando el servidor...")
-		cancel()        // Cancelar todas las operaciones con el contexto
-		close(msgChan)  // Cerrar el canal para que los workers terminen
+
+		// Cancelar todas las operaciones con el contexto
+		cancel()
+
+		// Cerrar el canal de mensajes, permitiendo que los workers terminen
+		close(msgChan)
+
+		// Esperar a que todos los workers finalicen
+		wg.Wait()
+		fmt.Println("Todos los workers han terminado. Saliendo...")
 	}()
 
 	fmt.Println("Servidor HTTP escuchando en :8080")
