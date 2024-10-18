@@ -16,34 +16,31 @@ type Message struct {
 // Iniciar los workers
 func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, apiURL string, tcpAddress string, wg *sync.WaitGroup) {
 	for i := 0; i < workerCount; i++ {
-		wg.Add(1) // Incrementar el contador del wait group por cada worker
-
-		go func(id int) {
-			defer wg.Done() // Decrementar el contador del wait group cuando el worker finalice
+		wg.Add(1) // Agregar al wait group
+		go func(workerID int) {
+			defer wg.Done() // Marcar el worker como terminado al final
 
 			for {
 				select {
-				case <-ctx.Done():
-					fmt.Printf("Worker %d finalizado.\n", id)
-					return // Finalizar el worker cuando el contexto se cancele
 				case msg, ok := <-msgChan:
-					if !ok {
-						// Si el canal está cerrado, salir del worker
-						fmt.Printf("Worker %d: canal cerrado, finalizando.\n", id)
+					if !ok { // Canal cerrado, salir
 						return
 					}
-					// Procesar el mensaje
 					response, err := tcp.SendTCPMessage(msg.Content, tcpAddress)
 					if err != nil {
-						msg.Response <- "Error al enviar mensaje TCP"
+						msg.Response <- response
 						continue
 					}
 					msg.Response <- response
 
 					// Llamar a otra API HTTP con la respuesta recibida
 					tcp.CallAnotherAPI(apiURL, response)
+				case <-ctx.Done(): // Manejar la cancelación
+			case <-ctx.Done():
+					fmt.Printf("Worker %d finalizado.\n", workerID)
+					return // Salir del worker
 				}
 			}
-		}(i)
+		}(i) // Pasar el ID del worker a la goroutine
 	}
 }

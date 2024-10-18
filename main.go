@@ -80,10 +80,10 @@ func main() {
 	}
 
 	// Realizar el cierre del servidor después de la cancelación
-	ctx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelShutdown()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(ctxShutdown); err != nil {
 		fmt.Println("Error al cerrar el servidor:", err)
 	}
 
