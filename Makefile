@@ -46,3 +46,6 @@ curl-api:
 
 send-tcp-mock:
 		echo "someText" | nc localhost 9000
+
+run-loop:
+	./loop.sh
