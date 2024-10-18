@@ -33,15 +33,9 @@ func CallAnotherAPI(apiURL, response string) {
 }
 
 // Establecer conexión TCP y enviar un mensaje
-func SendTCPMessage(content string) (string, error) {
+func SendTCPMessage(content string, tcpAddress string) (string, error) {
 	var conn net.Conn
 	var err error
-
-	// Leer la dirección TCP desde las variables de entorno
-	tcpAddress := os.Getenv("TCP_ADDRESS")
-	if tcpAddress == "" {
-		return "Error: TCP_ADDRESS no está configurada", fmt.Errorf("TCP_ADDRESS no está configurada")
-	}
 
 	// Intentar conectarse al servidor TCP usando la variable de entorno
 	for {

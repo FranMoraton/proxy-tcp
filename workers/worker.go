@@ -11,11 +11,11 @@ type Message struct {
 }
 
 // Iniciar los workers
-func StartWorkers(workerCount int, msgChan chan Message, apiURL string) {
+func StartWorkers(workerCount int, msgChan chan Message, apiURL string, tcpAddrss string) {
 	for i := 0; i < workerCount; i++ {
 		go func() {
 			for msg := range msgChan {
-				response, err := tcp.SendTCPMessage(msg.Content)
+				response, err := tcp.SendTCPMessage(msg.Content, tcpAddress)
 				if err != nil {
 					msg.Response <- response
 					continue

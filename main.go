@@ -25,11 +25,18 @@ func main() {
 		apiURL = "http://localhost:8000/another-api" // Valor por defecto
 	}
 
+
+	// Leer la dirección TCP desde las variables de entorno
+	tcpAddress := os.Getenv("TCP_ADDRESS")
+	if tcpAddress == "" {
+		tcpAddress = "http://localhost:9000"
+	}
+
 	// Crear un canal para comunicarse entre goroutines
 	msgChan := make(chan workers.Message)
 
 	// Iniciar los workers
-	workers.StartWorkers(workerCount, msgChan, apiURL)
+	workers.StartWorkers(workerCount, msgChan, apiURL, tcpAddress)
 
 	http.HandleFunc("/send", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleSend(w, r, msgChan)
