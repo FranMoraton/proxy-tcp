@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Compilar el binario
-RUN go build -o tcp_server .
+RUN CGO_ENABLED=0 GOOS=linux go build -o tcp_server .
 
 # Usar una imagen más ligera para el contenedor final
 FROM alpine:latest AS final
