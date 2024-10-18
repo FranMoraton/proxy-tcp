@@ -5,7 +5,8 @@ FROM golang:1.23 AS builder
 WORKDIR /app
 
 # Copiar el go.mod y el go.sum
-COPY go.mod go.sum ./
+COPY go.mod ./
+# COPY go.sum ./
 
 # Descargar las dependencias
 RUN go mod download

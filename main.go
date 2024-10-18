@@ -62,15 +62,23 @@ func main() {
 		<-sigs // Esperar la señal de terminación
 		fmt.Println("Señal de terminación recibida. Cerrando el servidor...")
 
-		// Cancelar todas las operaciones con el contexto
+		// Luego, cancelar todas las operaciones con el contexto
 		cancel()
-
+	
 		// Cerrar el canal de mensajes, permitiendo que los workers terminen
 		close(msgChan)
-
+	
 		// Esperar a que todos los workers finalicen
 		wg.Wait()
 		fmt.Println("Todos los workers han terminado. Saliendo...")
+
+		// Primero, detener el servidor HTTP para no aceptar nuevas solicitudes
+		ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancelShutdown()
+	
+		if err := srv.Shutdown(ctxShutdown); err != nil {
+			fmt.Println("Error al cerrar el servidor:", err)
+		}
 	}()
 
 	fmt.Println("Servidor HTTP escuchando en :8080")
@@ -78,13 +86,4 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Println("Error al iniciar el servidor:", err)
 	}
-
-	// Realizar el cierre del servidor después de la cancelación
-	ctxShutdown, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	
-	if err := srv.Shutdown(ctxShutdown); err != nil {
-		fmt.Println("Error al cerrar el servidor:", err)
-	}
-
-	fmt.Println("Servidor cerrado.")
 }
