@@ -12,9 +12,16 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
+
 	// Crear contexto con cancelación
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -64,10 +71,10 @@ func main() {
 
 		// Luego, cancelar todas las operaciones con el contexto
 		cancel()
-	
+
 		// Cerrar el canal de mensajes, permitiendo que los workers terminen
 		close(msgChan)
-	
+
 		// Esperar a que todos los workers finalicen
 		wg.Wait()
 		fmt.Println("Todos los workers han terminado. Saliendo...")
@@ -75,7 +82,7 @@ func main() {
 		// Primero, detener el servidor HTTP para no aceptar nuevas solicitudes
 		ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancelShutdown()
-	
+
 		if err := srv.Shutdown(ctxShutdown); err != nil {
 			fmt.Println("Error al cerrar el servidor:", err)
 		}

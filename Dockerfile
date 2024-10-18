@@ -5,8 +5,7 @@ FROM golang:1.23 AS builder
 WORKDIR /app
 
 # Copiar el go.mod y el go.sum
-COPY go.mod ./
-# COPY go.sum ./
+COPY go.mod go.sum ./
 
 # Descargar las dependencias
 RUN go mod download
@@ -18,7 +17,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o myapp .
 
 # Usar una imagen más ligera para el contenedor final
-FROM alpine:latest as final
+FROM alpine:latest AS final
 
 # Establecer el directorio de trabajo
 WORKDIR /root/

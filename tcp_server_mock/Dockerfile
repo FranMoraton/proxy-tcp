@@ -11,7 +11,7 @@ COPY . .
 RUN go build -o tcp_server .
 
 # Usar una imagen más ligera para el contenedor final
-FROM alpine:latest as final
+FROM alpine:latest AS final
 
 # Establecer el directorio de trabajo
 WORKDIR /root/

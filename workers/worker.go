@@ -37,7 +37,6 @@ func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, ap
 					// Llamar a otra API HTTP con la respuesta recibida
 					tcp.CallAnotherAPI(apiURL, response)
 				case <-ctx.Done(): // Manejar la cancelación
-			case <-ctx.Done():
 					fmt.Printf("Worker %d finalizado.\n", workerID)
 					return // Salir del worker
 				}
