@@ -1,7 +1,7 @@
 services:
   tcp_server:
     build:
-      context: ./tcp_server
+      context: ./tcp_server_mock
     ports:
       - "9000:9000"
 

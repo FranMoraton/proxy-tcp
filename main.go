@@ -29,7 +29,7 @@ func main() {
 	// Leer la dirección TCP desde las variables de entorno
 	tcpAddress := os.Getenv("TCP_ADDRESS")
 	if tcpAddress == "" {
-		tcpAddress = "localhost:9000"
+		tcpAddress = "http://localhost:9000"
 	}
 
 	// Crear un canal para comunicarse entre goroutines
