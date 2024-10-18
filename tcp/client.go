@@ -2,7 +2,6 @@ package tcp
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net"
