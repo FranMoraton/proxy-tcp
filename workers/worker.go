@@ -24,6 +24,7 @@ func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, ap
 				select {
 				case msg, ok := <-msgChan:
 					if !ok { // Canal cerrado, salir
+						fmt.Printf("cerrad por !ok en canal %d", workerID)
 						return
 					}
 					response, err := tcp.SendTCPMessage(msg.Content, tcpAddress)

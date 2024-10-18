@@ -41,7 +41,7 @@ func main() {
 	// Crear un canal para comunicarse entre goroutines
 	msgChan := make(chan workers.Message)
 
-	// Crear un wait group para esperar a que los workers terminen
+	// Crear un wait group para esperar a que los workers y el servidor terminen
 	var wg sync.WaitGroup
 
 	// Iniciar los workers con el contexto
@@ -58,6 +58,16 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
+	// Iniciar goroutine para el servidor
+	wg.Add(1) // Aumentar el contador del WaitGroup
+	go func() {
+		defer wg.Done() // Marcar como terminado al final
+		fmt.Println("Servidor HTTP escuchando en :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Println("Error al iniciar el servidor:", err)
+		}
+	}()
+
 	go func() {
 		<-sigs // Esperar la señal de terminación
 		fmt.Println("Señal de terminación recibida. Cerrando el servidor...")
@@ -73,11 +83,8 @@ func main() {
 		fmt.Println("Todos los workers han terminado. Saliendo...")
 	}()
 
-	fmt.Println("Servidor HTTP escuchando en :8080")
-	// Usar Shutdown para cerrar el servidor ordenadamente
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		fmt.Println("Error al iniciar el servidor:", err)
-	}
+	// Esperar a que todos los workers y el servidor terminen
+	wg.Wait()
 
 	// Realizar el cierre del servidor después de la cancelación
 	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
