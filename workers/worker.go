@@ -12,22 +12,19 @@ type Message struct {
 	Response chan string // Canal para enviar la respuesta de vuelta al handler HTTP
 }
 
-// Iniciar los workers con el contexto
+// Iniciar los workers
 func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, apiURL string, tcpAddress string) {
 	for i := 0; i < workerCount; i++ {
-		go func() {
+		go func(id int) {
 			for {
 				select {
-				case <-ctx.Done(): // Si el contexto se cancela, salir del worker
-					fmt.Println("Worker finalizado.")
-					return
-				case msg, ok := <-msgChan:
-					if !ok {
-						return // Canal cerrado, finalizar worker
-					}
-					response, err := tcp.SendTCPMessage(ctx, msg.Content, tcpAddress)
+				case <-ctx.Done():
+					fmt.Printf("Worker %d finalizado.\n", id)
+					return // Finalizar el worker cuando el contexto se cancele
+				case msg := <-msgChan:
+					response, err := tcp.SendTCPMessage(msg.Content, tcpAddress)
 					if err != nil {
-						msg.Response <- response
+						msg.Response <- "Error al enviar mensaje TCP"
 						continue
 					}
 					msg.Response <- response
@@ -36,6 +33,6 @@ func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, ap
 					tcp.CallAnotherAPI(apiURL, response)
 				}
 			}
-		}()
+		}(i)
 	}
 }

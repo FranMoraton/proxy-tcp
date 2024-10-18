@@ -13,6 +13,9 @@ import (
 )
 
 func main() {
+	// Crear contexto con cancelación
+	ctx, cancel := context.WithCancel(context.Background())
+
 	// Leer el número de workers desde la variable de entorno
 	workerCountStr := os.Getenv("WORKERS")
 	workerCount, err := strconv.Atoi(workerCountStr)
@@ -29,14 +32,11 @@ func main() {
 	// Leer la dirección TCP desde las variables de entorno
 	tcpAddress := os.Getenv("TCP_ADDRESS")
 	if tcpAddress == "" {
-		tcpAddress = "http://localhost:9000"
+		tcpAddress = "localhost:9000" // Valor por defecto
 	}
 
 	// Crear un canal para comunicarse entre goroutines
 	msgChan := make(chan workers.Message)
-
-	// Crear un contexto con cancelación para poder cerrar los workers
-	ctx, cancel := context.WithCancel(context.Background())
 
 	// Iniciar los workers con el contexto
 	workers.StartWorkers(ctx, workerCount, msgChan, apiURL, tcpAddress)
@@ -52,9 +52,8 @@ func main() {
 	go func() {
 		<-sigs // Esperar la señal de terminación
 		fmt.Println("Señal de terminación recibida. Cerrando el servidor...")
-
-		cancel()        // Cancelar el contexto para que los workers terminen
-		close(msgChan)  // Cerrar el canal para detener los workers
+		cancel()        // Cancelar todas las operaciones con el contexto
+		close(msgChan)  // Cerrar el canal para que los workers terminen
 	}()
 
 	fmt.Println("Servidor HTTP escuchando en :8080")
