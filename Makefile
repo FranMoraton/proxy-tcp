@@ -38,3 +38,9 @@ cache-folders:
 
 curl:
 		curl -X POST http://localhost:8080/send
+
+curl-api:
+		curl -X POST http://localhost:8081/dummy-api
+
+send-tcp-mock:
+		echo "someText" | nc localhost 9000
