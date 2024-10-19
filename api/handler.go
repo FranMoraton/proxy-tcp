@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-// RequestBody defines the expected structure of the incoming JSON payload
+// RequestBody estructura de la petición entrante
 type RequestBody struct {
 	Message string `json:"message"`
 }
 
-// HandleSend maneja las solicitudes entrantes en la ruta /send
+// HandleSend maneja la solicitud POST /send
 func HandleSend(w http.ResponseWriter, r *http.Request, msgChan chan workers.Message) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
@@ -20,37 +20,35 @@ func HandleSend(w http.ResponseWriter, r *http.Request, msgChan chan workers.Mes
 
 	// Verificar que el Content-Type sea application/json
 	if r.Header.Get("Content-Type") != "application/json" {
-		http.Error(w, "Content-Type no soportado, debe ser application/json", http.StatusUnsupportedMediaType)
+		http.Error(w, "Content-Type no soportado", http.StatusUnsupportedMediaType)
 		return
 	}
 
-	// Decodificar el cuerpo de la petición JSON
+	// Decodificar el cuerpo JSON
 	var reqBody RequestBody
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, "Error al decodificar el JSON", http.StatusBadRequest)
 		return
 	}
 
-	// Leer el mensaje del cuerpo de la petición
+	// Crear mensaje y enviar al canal
 	msg := workers.Message{
 		Content:  reqBody.Message,
 		Response: make(chan string),
 	}
 
-	// Verificar si el canal está cerrado antes de enviar
 	select {
 	case msgChan <- msg:
-		// Si el mensaje fue enviado exitosamente
+		// Mensaje enviado, devolver OK
 		w.Write([]byte("OK"))
 
-		// Esperar la respuesta asincrónica en una goroutine separada
+		// Esperar la respuesta del worker
 		go func() {
 			response := <-msg.Response
-			// Aquí podrías manejar la respuesta, como imprimirla o registrarla
 			println("Respuesta del TCP:", response)
 		}()
 	default:
-		// Si el canal está cerrado, devolver un error al cliente
+		// Si el canal está cerrado
 		http.Error(w, "No se puede enviar el mensaje, el servidor está cerrando", http.StatusInternalServerError)
 	}
 }

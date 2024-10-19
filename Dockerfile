@@ -32,7 +32,7 @@ CMD ["air", "-c", ".air.toml"]
 FROM base AS builder
 
 # Compilar el binario
-RUN CGO_ENABLED=0 GOOS=linux go build -o myapp .
+RUN CGO_ENABLED=0 GOOS=linux go build -o myapp ./cmd
 
 # Usar una imagen más ligera para el contenedor final
 FROM alpine:latest AS final

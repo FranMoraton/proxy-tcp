@@ -5,7 +5,7 @@ include_ext = ["go"]                 # Extensiones a incluir para la observació
 exclude_dir = ["tmp"]                # Directorios que deseas excluir de la observación
 
 # Comando para compilar tu aplicación y generar el binario en tmp/main
-build.cmd = "go build -buildvcs=false -o tmp/main ."
+build.cmd = "go build -buildvcs=false -o tmp/main ./cmd"
 
 # Especifica el binario que air debe ejecutar
 build.bin = "tmp/main"
