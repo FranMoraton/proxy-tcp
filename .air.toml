@@ -11,4 +11,4 @@ build.cmd = "go build -buildvcs=false -o tmp/main ."
 build.bin = "tmp/main"
 
 # Otros ajustes para la observación de directorios y archivos
-watch_dir = ["api", "workers", "tcp", "tcp_server_mock"]
+watch_dir = ["api", "workers", "tcp"]
