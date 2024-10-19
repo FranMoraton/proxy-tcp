@@ -1,0 +1,14 @@
+# Configuración básica de air
+root = "."                           # Directorio raíz de tu proyecto
+tmp_dir = "tmp"                      # Directorio temporal donde air almacenará los archivos temporales
+include_ext = ["go"]                 # Extensiones a incluir para la observación
+exclude_dir = ["tmp"]                # Directorios que deseas excluir de la observación
+
+# Comando para compilar tu aplicación y generar el binario en tmp/main
+build.cmd = "go build -buildvcs=false -o tmp/main ."
+
+# Especifica el binario que air debe ejecutar
+build.bin = "tmp/main"
+
+# Otros ajustes para la observación de directorios y archivos
+watch_dir = ["api", "workers", "tcp", "tcp_server_mock"]

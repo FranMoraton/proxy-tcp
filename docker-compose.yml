@@ -8,10 +8,13 @@ services:
   myapp:
     build:
       context: .
+      target: development
     ports:
       - "8080:8080"
     env_file:
       - .env
+    volumes:
+      - .:/app 
     depends_on:
       - tcp_server
 
