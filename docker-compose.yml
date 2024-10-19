@@ -1,7 +1,7 @@
 services:
   tcp_server:
     build:
-      context: ./tcp_server_mock
+      context: ./docker/test/tcp_server_mock
     ports:
       - "9000:9000"
 
@@ -20,6 +20,6 @@ services:
 
   dummy_api:
     build:
-      context: ./dummy_api
+      context: ./docker/test/dummy_api
     ports:
       - "8081:8081"
