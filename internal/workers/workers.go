@@ -3,7 +3,7 @@ package workers
 import (
 	"context"
 	"fmt"
-	"myapp/tcp"
+	"myapp/internal/tcp"
 	"sync"
 )
 

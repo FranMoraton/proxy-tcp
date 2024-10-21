@@ -2,7 +2,7 @@ package tcp_test
 
 import (
 	"fmt"
-	"myapp/tcp"
+	"myapp/internal/tcp"
 	"net"
 	"testing"
 )

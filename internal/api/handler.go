@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"myapp/workers"
+	"myapp/internal/workers"
 	"net/http"
 )
 

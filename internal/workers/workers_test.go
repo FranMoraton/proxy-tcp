@@ -2,7 +2,7 @@ package workers_test
 
 import (
 	"context"
-	"myapp/workers"
+	"myapp/internal/workers"
 	"sync"
 	"testing"
 	"time"

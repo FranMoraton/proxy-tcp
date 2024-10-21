@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"myapp/api"
-	"myapp/config"
-	"myapp/workers"
+	"myapp/internal/api"
+	"myapp/internal/config"
+	"myapp/internal/workers"
 	"net/http"
 	"os"
 	"os/signal"

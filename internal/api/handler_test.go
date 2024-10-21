@@ -3,8 +3,8 @@ package api_test
 import (
 	"bytes"
 	"encoding/json"
-	"myapp/api"
-	"myapp/workers"
+	"myapp/internal/api"
+	"myapp/internal/workers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
