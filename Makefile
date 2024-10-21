@@ -49,3 +49,6 @@ send-tcp-mock:
 
 run-loop:
 	./loop.sh
+
+test:
+	docker compose exec -u ${UID}:${GID} ${APP_SERVICE} sh -c "XDG_CACHE_HOME=/tmp/.cache go test ./..."
