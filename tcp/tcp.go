@@ -10,7 +10,6 @@ import (
 	"time"
 )
 
-// CallAnotherAPI realiza una llamada POST a otra API
 func CallAnotherAPI(apiURL, response string) {
 	body, err := json.Marshal(map[string]string{"response": response})
 	if err != nil {
@@ -38,7 +37,6 @@ func CallAnotherAPI(apiURL, response string) {
 	}
 }
 
-// SendTCPMessage envía un mensaje TCP y espera una respuesta
 func SendTCPMessage(content, tcpAddress string) (string, error) {
 	dialer := net.Dialer{Timeout: 40 * time.Second}
 	conn, err := dialer.Dial("tcp", tcpAddress)

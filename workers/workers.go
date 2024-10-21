@@ -7,13 +7,11 @@ import (
 	"sync"
 )
 
-// Message estructura para representar los mensajes procesados
 type Message struct {
 	Content  string
 	Response chan string
 }
 
-// StartWorkers inicia los workers
 func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, apiURL, tcpAddress string, wg *sync.WaitGroup) {
 	for i := 0; i < workerCount; i++ {
 		wg.Add(1)
@@ -28,7 +26,6 @@ func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, ap
 						return
 					}
 
-					// Procesar mensaje
 					response, err := tcp.SendTCPMessage(msg.Content, tcpAddress)
 					if err != nil {
 						msg.Response <- response
@@ -36,7 +33,6 @@ func StartWorkers(ctx context.Context, workerCount int, msgChan chan Message, ap
 					}
 					msg.Response <- response
 
-					// Llamar a otra API
 					tcp.CallAnotherAPI(apiURL, response)
 					fmt.Printf("Mensaje procesado por worker %d\n", workerID)
 

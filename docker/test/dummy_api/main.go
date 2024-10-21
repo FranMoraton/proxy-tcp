@@ -13,7 +13,6 @@ type Response struct {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// Simular respuesta de la API
 	response := Response{
 		Message: "Respuesta desde la API dummy!",
 	}

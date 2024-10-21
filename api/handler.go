@@ -6,32 +6,27 @@ import (
 	"net/http"
 )
 
-// RequestBody estructura de la petición entrante
 type RequestBody struct {
 	Message string `json:"message"`
 }
 
-// HandleSend maneja la solicitud POST /send
 func HandleSend(w http.ResponseWriter, r *http.Request, msgChan chan workers.Message) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Verificar que el Content-Type sea application/json
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "Content-Type no soportado", http.StatusUnsupportedMediaType)
 		return
 	}
 
-	// Decodificar el cuerpo JSON
 	var reqBody RequestBody
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, "Error al decodificar el JSON", http.StatusBadRequest)
 		return
 	}
 
-	// Crear mensaje y enviar al canal
 	msg := workers.Message{
 		Content:  reqBody.Message,
 		Response: make(chan string),
